@@ -4,50 +4,63 @@ public class Bullet : MonoBehaviour
 {
     public float speed = 10f;
     public float lifeTime = 5f;
+    public float hitDistance = 1f;
 
     private Vector3 direction;
     private float timer;
 
+    // Set bullet direction
     public void SetDirection(Vector3 newDirection)
     {
         direction = newDirection.normalized;
     }
 
+    // The bullet moves
     void Update()
     {
-        // Moves bullet
         transform.position +=
             direction * speed * Time.deltaTime;
 
         timer += Time.deltaTime;
 
-        // Delete after some time
+        // destroys it after some time
         if (timer >= lifeTime)
         {
             Destroy(gameObject);
             return;
         }
 
-        CheckPlayer();
+        CheckCreatureHit();
     }
 
-    void CheckPlayer()
+    void CheckCreatureHit()
     {
-        GameObject player =
-            GameObject.FindGameObjectWithTag("Player");
+        // To find the creature or the enemy
+        GameObject[] creatures =
+            GameObject.FindGameObjectsWithTag("Creature");
 
-        if (player == null)
-            return;
-
-        float distance = Vector3.Distance(
-            transform.position,
-            player.transform.position
-        );
-
-        // Hits the player
-        if (distance < 0.5f)
+        foreach (GameObject creatureObject in creatures)
         {
-            GameManager.Instance.PlayerHit();
+            float distance = Vector3.Distance(
+                transform.position,
+                creatureObject.transform.position
+            );
+
+            if (distance <= hitDistance)
+            {
+                Creature creature =
+                    creatureObject.GetComponent<Creature>();
+
+                if (creature != null)
+                {
+                    // Damage is taken
+                    creature.TakeDamage(1);
+                }
+
+                Destroy(gameObject);
+
+                return;
+            }
         }
     }
 }

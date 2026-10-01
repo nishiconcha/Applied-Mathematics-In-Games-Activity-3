@@ -1,38 +1,95 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static UnityEngine.GraphicsBuffer;
+using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public GameObject winPanel;
+    [Header("Player HP")]
+    public int maxHP = 20;
+    public int currentHP = 20;
 
-    void Awake()
+    [Header("HP UI")]
+    public Image realHPBar;
+    public Image ghostHPBar;
+
+    public TMP_Text hpText;
+
+    private float ghostDelay = 0.5f;
+    private float ghostTimer;
+
+    private bool gameOver;
+
+    void Update()
     {
-        Instance = this;
+        UpdateRealHP();
+        UpdateGhostHP();
+    }
 
-        // hide win panel
-        if (winPanel != null)
+    public void CreatureReachedTarget()
+    {
+        if (gameOver)
+            return;
+
+        currentHP--;
+
+        if (currentHP <= 0)
         {
-            winPanel.SetActive(false);
+            currentHP = 0;
+        }
+
+        ghostTimer = 0f;
+    }
+
+    void UpdateRealHP()
+    {
+        if (realHPBar != null)
+        {
+            realHPBar.fillAmount =
+                (float)currentHP / maxHP;
+        }
+
+        if (hpText != null)
+        {
+            hpText.text =
+                "HP: " +
+                currentHP +
+                " / " +
+                maxHP;
         }
     }
 
-    public void PlayerHit()
+    void UpdateGhostHP()
     {
-        // Restart
-        SceneManager.LoadScene(
-            SceneManager.GetActiveScene().buildIndex
-        );
-    }
+        if (ghostHPBar == null)
+            return;
 
-    public void WinGame()
-    {
-        // win panel
-        if (winPanel != null)
+        float target =
+            (float)currentHP / maxHP;
+
+        if (ghostHPBar.fillAmount <= target)
         {
-            winPanel.SetActive(true);
+            ghostHPBar.fillAmount = target;
+            return;
         }
+
+        ghostTimer += Time.deltaTime;
+
+        if (ghostTimer < ghostDelay)
+            return;
+
+        float current =
+            ghostHPBar.fillAmount;
+
+        float newValue =
+            Mathf.Lerp(
+                current,
+                target,
+                5f * Time.deltaTime
+            );
+
+        ghostHPBar.fillAmount =
+            Mathf.Clamp01(newValue);
     }
 }

@@ -21,7 +21,7 @@ public class Turret : MonoBehaviour
 
     private GameObject player;
     private float timer;
-    private bool sniperFired;
+    private GameObject sniperTarget;
     private bool stopped;
 
     // Range visual
@@ -30,20 +30,24 @@ public class Turret : MonoBehaviour
     void Start()
     {
         // Find player to shoot at
-        player = GameObject.FindGameObjectWithTag("Player");
         line = GetComponent<LineRenderer>();
     }
 
     void Update()
     {
-        if (stopped || player == null)
+        if (stopped)
+            return;
+
+        FindTarget();
+
+        // Update range visual
+        DrawRange();
+
+        if (player == null)
             return;
 
         // Aim at player
         AimAtPlayer();
-
-        // Update range visual
-        DrawRange();
 
         timer += Time.deltaTime;
 
@@ -61,19 +65,60 @@ public class Turret : MonoBehaviour
         }
     }
 
+    void FindTarget()
+    {
+        GameObject[] creatures =
+            GameObject.FindGameObjectsWithTag("Creature");
+
+        GameObject closest = null;
+        float closestDistance = range;
+
+        foreach (GameObject creature in creatures)
+        {
+            float distance = Vector3.Distance(
+                transform.position,
+                creature.transform.position
+            );
+
+            if (distance <= closestDistance)
+            {
+                closest = creature;
+                closestDistance = distance;
+            }
+        }
+
+        player = closest;
+    }
+
+    // player is the creature now
     void AimAtPlayer()
     {
         // Get direction to player
-        Vector3 dir = player.transform.position - transform.position;
+        Vector3 dir =
+            player.transform.position -
+            transform.position;
+
+        dir.y = 0f;
 
         // Get the angle and the rotation off the turret
-        float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        float angle =
+            Mathf.Atan2(dir.x, dir.z) *
+            Mathf.Rad2Deg;
+
+        transform.rotation =
+            Quaternion.Euler(
+                0f,
+                angle,
+                0f
+            );
     }
 
     // Check if player is inside the range and cone
     bool PlayerInRange()
     {
+        if (player == null)
+            return false;
+
         float distance = Vector3.Distance(
             transform.position,
             player.transform.position
@@ -84,7 +129,13 @@ public class Turret : MonoBehaviour
 
     bool PlayerInCone()
     {
-        Vector3 dir = player.transform.position - transform.position;
+        if (player == null)
+            return false;
+
+        Vector3 dir =
+            player.transform.position -
+            transform.position;
+
         dir.y = 0f;
 
         float angle = Vector3.Angle(
@@ -101,24 +152,34 @@ public class Turret : MonoBehaviour
         // Fire continuously in cone
         if (PlayerInCone() && timer >= fireRate)
         {
-            Shoot(transform.forward);
+            Vector3 direction =
+                player.transform.position -
+                transform.position;
+
+            Shoot(direction);
+
             timer = 0f;
         }
     }
 
     void SniperAttack()
     {
-        // Fire once when player enters range
-        if (PlayerInRange() && !sniperFired)
+        // Fire once at each new creature
+        if (PlayerInRange() && player != sniperTarget)
         {
-            Shoot(transform.forward);
-            sniperFired = true;
+            Vector3 direction =
+                player.transform.position -
+                transform.position;
+
+            Shoot(direction);
+
+            sniperTarget = player;
         }
 
-        // Reset after player leaves
-        if (!PlayerInRange())
+        // Reset after there are no creatures
+        if (player == null)
         {
-            sniperFired = false;
+            sniperTarget = null;
         }
     }
 
@@ -127,7 +188,13 @@ public class Turret : MonoBehaviour
         // Fire spread 3 bullets
         if (PlayerInCone() && timer >= fireRate)
         {
-            Shoot(transform.forward);
+            Vector3 direction =
+                player.transform.position -
+                transform.position;
+
+            direction.y = 0f;
+
+            Shoot(direction);
 
             Quaternion left =
                 Quaternion.Euler(0f, -15f, 0f);
@@ -135,8 +202,8 @@ public class Turret : MonoBehaviour
             Quaternion right =
                 Quaternion.Euler(0f, 15f, 0f);
 
-            Shoot(left * transform.forward);
-            Shoot(right * transform.forward);
+            Shoot(left * direction);
+            Shoot(right * direction);
 
             timer = 0f;
         }
@@ -145,6 +212,9 @@ public class Turret : MonoBehaviour
     void Shoot(Vector3 direction)
     {
         // create bullet
+        direction.y = 0f;
+        direction.Normalize();
+
         GameObject bullet = Instantiate(
             bulletPrefab,
             transform.position + direction,
@@ -208,12 +278,15 @@ public class Turret : MonoBehaviour
             line.SetPosition(i + 1, point);
         }
 
-        line.SetPosition(points + 1, Vector3.zero);
+        line.SetPosition(
+            points + 1,
+            Vector3.zero
+        );
     }
 
     public void StopTurret()
     {
-        // Stop shootingg
+        // Stop shooting
         stopped = true;
     }
 }
