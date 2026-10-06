@@ -684,8 +684,6 @@ MonoBehaviour:
   currentHP: 20
   realHPBar: {fileID: 743702565}
   ghostHPBar: {fileID: 1550397118}
-  gameOverPanel: {fileID: 0}
-  winPanel: {fileID: 459463074}
   hpText: {fileID: 1831691920}
 --- !u!1 &330585543
 GameObject:
@@ -1717,7 +1715,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -622.37646, y: -473.3324}
+  m_AnchoredPosition: {x: -413.99646, y: -306.3324}
   m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &992459301
@@ -2457,7 +2455,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -622.38, y: -396}
+  m_AnchoredPosition: {x: -414, y: -229}
   m_SizeDelta: {x: 588.21, y: 48.2043}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1831691920
@@ -2824,7 +2822,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -743.99976, y: 462}
+  m_AnchoredPosition: {x: -539, y: 292}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1968469701
